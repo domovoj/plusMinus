@@ -27,7 +27,7 @@
                         before: {
                             beforeG: $.plusMinus.dP.before,
                             before: options.before,
-                            beforeEl: eval('(' + data.before + ')'),
+                            beforeEl: eval('(' + data.before + ')')
                         },
                         after: {
                             afterG: $.plusMinus.dP.after,
@@ -40,10 +40,12 @@
                     input.data('plusMinus', opt);
                     methods.testNumber.call(input, true);
                     $(this).on('keypress.' + $.plusMinus.nS, function(e) {
-                        methods.testNumber.call(input);
-                    }).on('keyup.' + $.plusMinus.nS, function(e) {
-//                        if (methods.SC)
-//                            methods.testNumber.call(input);
+                        methods.testNumber.call($(this));
+                        $(this).off('keyup.' + $.plusMinus.nS);
+                        if (e.ctrlKey || e.altKey || e.metaKey)
+                            $(this).on('keyup.' + $.plusMinus.nS, function(e) {
+                                methods.testNumber.call($(this));
+                            });
                     });
                     if (settings.hover)
                         opt.next.add(opt.prev).on('mouseover.' + $.plusMinus.nS, function(e) {
@@ -95,10 +97,10 @@
             methods._changeCount.call(prev, prev.data('plusMinus'));
             return $this;
         },
-        getValue: function() {
+        getValue: function(val) {
             var $this = $(this),
-                    data = $this.data('plusMinus'),
-                    val = $this.val();
+                    data = $this.data('plusMinus');
+            val = val || $this.val();
             return val.toString().indexOf(data.divider) === -1 ? val : val.toString().replace(data.divider, '.');
         },
         setValue: function(val, noChange) {
@@ -106,23 +108,24 @@
                     data = $this.data('plusMinus');
             val = val.toString().indexOf('.') === -1 ? val : val.toString().replace('.', data.divider);
             function _change() {
-                $this.val(val).data('val', val);
+                $this.val(val);
+                data.val = val;
             }
-            if (!noChange) {
-//                    var resB = {},
-//                            resBA = [];
-//                    for (var i in data.callbacks.before)
-//                        if (data.callbacks.before[i]) {
-//                            resB[i] = data.callbacks.before[i].call($this, data);
-//                            resBA.push(resB[i]);
-//                        }
-//                    if ($.inArray(false, resBA) === -1 || resBA.length === 0) {
-                _change();
-//                        if (!noChange)
-//                            for (var i in data.callbacks.after)
-//                                if (data.callbacks.after[i])
-//                                    data.callbacks.after[i].call($this, data, resB);
-                //   }
+            if (!noChange && data.val !== val) {
+                var resB = {},
+                        resBA = [];
+                for (var i in data.callbacks.before)
+                    if (data.callbacks.before[i]) {
+                        resB[i] = data.callbacks.before[i].call($this, data);
+                        resBA.push(resB[i]);
+                    }
+                if ($.inArray(false, resBA) === -1 || resBA.length === 0) {
+                    _change();
+                    if (!noChange)
+                        for (var i in data.callbacks.after)
+                            if (data.callbacks.after[i])
+                                data.callbacks.after[i].call($this, data, resB);
+                }
             }
             else
                 _change();
@@ -134,15 +137,14 @@
                     data = input.data('plusMinus');
             methods._enabled.call(data.next.add(data.prev));
             setTimeout(function() {
-                console.log(val.toString().match(data.pattern))
                 if (methods.getValue.call(input).toString().match(data.pattern))
                     methods.setValue.call(input, methods.getValue.call(input), start);
                 else if (val.toString().match(data.pattern))
-                    methods.setValue.call(input, val, start);
-                else if (data.val && data.val.toString().match(data.pattern))
-                    methods.setValue.call(input, data.val, start);
+                    methods.setValue.call(input, val, true);
+                else if (data.val && methods.getValue.call(input, data.val).toString().match(data.pattern))
+                    methods.setValue.call(input, methods.getValue.call(input, data.val), true);
                 else
-                    methods.setValue.call(input, data.value, start);
+                    methods.setValue.call(input, methods.getValue.call(input, data.value), start);
                 methods.checkMinMax.call(input, start);
             }, 0);
             return input;
