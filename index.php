@@ -13,6 +13,7 @@
         <script src="plusminus.js"></script>
     </head>
     <body>
+	a
         <h1>Simple Plusminus</h1>
         <button type="button">
             -
