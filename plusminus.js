@@ -1,12 +1,24 @@
 /*plugin plusminus*/
 (function($, isTouch) {
+    if (!Array.prototype.indexOf)
+        Array.prototype.indexOf = function(obj, start) {
+            for (var i = (start || 0); i < this.length; i++) {
+                if (this[i] === obj) {
+                    return i;
+                }
+            }
+            return -1;
+        };
     var methods = {
         destroy: function() {
             var $this = $(this),
                     data = $this.data('plusMinus');
             if (data) {
-                data.next.add(data.prev).off('mouseover.' + $.plusMinus.nS).off('click.' + $.plusMinus.nS).off('mouseup.' + $.plusMinus.nS).off('mousedown.' + $.plusMinus.nS).removeData('plusMinus');
-                $this.off('keyup.' + $.plusMinus.nS).off('keypress.' + $.plusMinus.nS).removeData('plusMinus');
+                console.log(data.prev.data('plusMinus').disabled)
+                data.next.data('plusMinus').disabled ? data.next.attr('disabled', 'disabled') : data.next.removeAttr('disabled');
+                data.prev.data('plusMinus').disabled ? data.prev.attr('disabled', 'disabled') : data.prev.removeAttr('disabled');
+                data.next.add(data.prev).off('mouseenter.' + $.plusMinus.nS).off('mouseleave.' + $.plusMinus.nS).off('click.' + $.plusMinus.nS).off('mouseup.' + $.plusMinus.nS).off('mousedown.' + $.plusMinus.nS).removeData('plusMinus').removeClass('plusMinus-disabled plusMinus-enabled');
+                $this.val(data.bval).off('input.' + $.plusMinus.nS).removeData('plusMinus');
             }
             return $this;
         },
@@ -17,12 +29,13 @@
                 return this.each(function() {
                     var input = $(this),
                             data = input.data();
-                    methods.destroy.call(input);
+
                     var opt = {};
                     for (var i in $.plusMinus.dP)
                         opt[i] = methods._checkProp.call([i], data, settings);
                     opt.next = typeof opt.next === 'string' ? methods._checkBtn.call(input, opt.next.split('.')) : opt.next;
                     opt.prev = typeof opt.prev === 'string' ? methods._checkBtn.call(input, opt.prev.split('.')) : opt.prev;
+                    opt.bval = input.val();
                     opt.callbacks = {
                         before: {
                             beforeG: $.plusMinus.dP.before,
@@ -37,27 +50,40 @@
                     };
                     delete opt.before;
                     delete opt.after;
+                    opt.next.data('plusMinus', $.extend({next: true, disabled: opt.next.is(':disabled') ? true : false}, dP));
+                    opt.prev.data('plusMinus', $.extend({next: false, disabled: opt.prev.is(':disabled') ? true : false}, dP));
+                    
+                    methods.destroy.call(input);
+
                     input.data('plusMinus', opt);
-                    methods.testNumber.call(input, true);
-                    $(this).on('keypress.' + $.plusMinus.nS, function(e) {
-                        methods.testNumber.call($(this));
-                        $(this).off('keyup.' + $.plusMinus.nS);
-                        if (e.ctrlKey || e.altKey || e.metaKey)
-                            $(this).on('keyup.' + $.plusMinus.nS, function(e) {
-                                methods.testNumber.call($(this));
-                            });
-                    });
-                    if (settings.hover)
-                        opt.next.add(opt.prev).on('mouseover.' + $.plusMinus.nS, function(e) {
-                            settings.hover(e, $(this), input, $(this).is(opt.next) ? 'next' : 'prev');
-                        });
                     var dP = {
                         input: input
                     };
                     if (opt.mouseDownChange)
                         dP.interval = [];
-                    opt.next.data('plusMinus', $.extend({next: true}, dP));
-                    opt.prev.data('plusMinus', $.extend({next: false}, dP));
+
+                    methods.testNumber.call(input, true);
+                    var inputJS = $(this).get(0);
+                    if ("onpropertychange" in inputJS)
+                        inputJS.onpropertychange = function() {
+                            if (event.propertyName == "value")
+                                methods.testNumber.call(input);
+                        };
+                    else
+                        input.on('input.' + $.plusMinus.nS, function(e) {
+                            methods.testNumber.call($(this));
+                        });
+
+                    if (settings.mouseenter)
+                        opt.next.add(opt.prev).on('mouseenter.' + $.plusMinus.nS, function(e) {
+                            var $this = $(this);
+                            $this.data('plusMinus').resMouseEnter = settings.mouseenter.call($this, input, $this.is(opt.next) ? 'plus' : 'minus');
+                        });
+                    if (settings.mouseleave)
+                        opt.next.add(opt.prev).on('mouseleave.' + $.plusMinus.nS, function(e) {
+                            var $this = $(this);
+                            settings.mouseleave.call($this, input, $this.is(opt.next) ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
+                        });
                     opt.next.add(opt.prev).on('click.' + $.plusMinus.nS, function(e) {
                         methods._changeCount.call(this, $(this).data('plusMinus'));
                     }).on('mouseup.' + $.plusMinus.nS, function(e) {
@@ -73,12 +99,10 @@
                                     methods._changeCount.call(_self, obj);
                                 }, opt.factor);
                             }, opt.delay);
-                        });
-                        $(window).on('mouseup.' + $.plusMinus.nS, function(e) {
-                            clearTimeout(opt.next.data('plusMinus').interval[0]);
-                            clearInterval(opt.next.data('plusMinus').interval[1]);
-                            clearTimeout(opt.prev.data('plusMinus').interval[0]);
-                            clearInterval(opt.prev.data('plusMinus').interval[1]);
+                            $(window).off('mouseup.' + $.plusMinus.nS).on('mouseup.' + $.plusMinus.nS, function(e) {
+                                clearTimeout(obj.interval[0]);
+                                clearInterval(obj.interval[1]);
+                            });
                         });
                     }
                 });
@@ -100,15 +124,17 @@
         getValue: function(val) {
             var $this = $(this),
                     data = $this.data('plusMinus');
-            val = val || $this.val();
+            val = val !== undefined ? val : $this.val();
             return val.toString().indexOf(data.divider) === -1 ? val : val.toString().replace(data.divider, '.');
         },
         setValue: function(val, noChange) {
             var $this = $(this),
                     data = $this.data('plusMinus');
             val = val.toString().indexOf('.') === -1 ? val : val.toString().replace('.', data.divider);
+            var cP = methods._getCursorPosition.call($this);
             function _change() {
                 $this.val(val);
+                methods._setCursorPosition.call($this, cP);
                 data.val = val;
             }
             if (!noChange && data.val !== val) {
@@ -129,7 +155,7 @@
             }
             else
                 _change();
-            return $this;
+            return val;
         },
         testNumber: function(start) {
             var input = $(this),
@@ -137,31 +163,54 @@
                     data = input.data('plusMinus');
             methods._enabled.call(data.next.add(data.prev));
             setTimeout(function() {
-                if (methods.getValue.call(input).toString().match(data.pattern))
-                    methods.setValue.call(input, methods.getValue.call(input), start);
+                var nVal = methods.getValue.call(input);
+                if (nVal.toString().match(data.pattern))
+                    methods.setValue.call(input, nVal, start);
                 else if (val.toString().match(data.pattern))
-                    methods.setValue.call(input, val, true);
+                    methods.setValue.call(input, val);
                 else if (data.val && methods.getValue.call(input, data.val).toString().match(data.pattern))
-                    methods.setValue.call(input, methods.getValue.call(input, data.val), true);
-                else
-                    methods.setValue.call(input, methods.getValue.call(input, data.value), start);
-                methods.checkMinMax.call(input, start);
+                    methods.setValue.call(input, methods.getValue.call(input, data.val));
+                else {
+                    methods.setValue.call(input, methods.getValue.call(input, data.value));
+                    methods._disabled.call(data.prev);
+                }
+
+                nVal = methods.getValue.call(input);
+                if (nVal && +nVal <= data.min) {
+                    methods.setValue.call(input, data.min, start);
+                    methods._disabled.call(data.prev);
+                }
+                if (nVal && +nVal >= data.max) {
+                    methods.setValue.call(input, data.max, start);
+                    methods._disabled.call(data.next);
+                }
             }, 0);
             return input;
         },
-        checkMinMax: function(start) {
-            var input = $(this),
-                    val = methods.getValue.call(input),
-                    data = input.data('plusMinus');
-            if (val && +val <= data.min) {
-                methods.setValue.call(input, data.min, start);
-                methods._disabled.call(data.prev);
+        _setCursorPosition: function(pos) {
+            if (!isTouch)
+                this.each(function() {
+                    this.select();
+                    try {
+                        this.setSelectionRange(pos, pos);
+                    } catch (err) {
+                    }
+
+                });
+            return this;
+        },
+        _getCursorPosition: function() {
+            var el = $(this).get(0),
+                    pos = 0;
+            if ('selectionStart' in el) {
+                pos = el.selectionStart;
+            } else if ('selection' in document) {
+                el.focus();
+                var Sel = document.selection.createRange();
+                Sel.moveStart('character', -el.value.length);
+                pos = Sel.text.length - document.selection.createRange().text.length;
             }
-            if (val && +val >= data.max) {
-                methods.setValue.call(input, data.max, start);
-                methods._disabled.call(data.next);
-            }
-            return input;
+            return pos;
         },
         _nextValue: function(value, next) {
             var $this = $(this),
@@ -177,14 +226,13 @@
         _changeCount: function(opt) {
             var el = $(this),
                     data = opt.input.data('plusMinus'),
-                    obtn = opt.next ? data.prev : data.next,
                     val = opt.next ? data.max : data.min;
             var nextVal = methods._nextValue.call(opt.input, parseFloat(methods.getValue.call(opt.input)), opt.next);
             if (nextVal <= val && opt.next || nextVal >= val && !opt.next) {
-                methods._enabled.call(obtn);
+                methods._enabled.call(opt.next ? data.prev : data.next);
                 methods.setValue.call(opt.input, nextVal);
-                var pattern = methods._nextValue.call(opt.input, nextVal, opt.next).toString().match(data.pattern);
-                if (nextVal === val || !pattern)
+                methods._setCursorPosition.call(opt.input, opt.input.val().length);
+                if (nextVal === val || !methods._nextValue.call(opt.input, nextVal, opt.next).toString().match(data.pattern))
                     methods._disabled.call(el);
             }
             else if (opt.interval)
