@@ -36,7 +36,7 @@
                         opt[i] = methods._checkProp.call([i], data, settings);
                     opt.next = typeof opt.next === 'string' ? methods._checkBtn.call(input, opt.next.split('.')) : opt.next;
                     opt.prev = typeof opt.prev === 'string' ? methods._checkBtn.call(input, opt.prev.split('.')) : opt.prev;
-                    opt.bval = input.val();
+                    opt.bval = +input.val();
                     opt.callbacks = {
                         before: {
                             beforeG: $.plusMinus.dP.before,
@@ -76,12 +76,12 @@
                     if (settings.mouseenter)
                         opt.next.add(opt.prev).on('mouseenter.' + $.plusMinus.nS, function(e) {
                             var $this = $(this);
-                            $this.data('plusMinus').resMouseEnter = settings.mouseenter.call($this, input, $this.is(opt.next) ? 'plus' : 'minus');
+                            $this.data('plusMinus').resMouseEnter = settings.mouseenter.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus');
                         });
                     if (settings.mouseleave)
                         opt.next.add(opt.prev).on('mouseleave.' + $.plusMinus.nS, function(e) {
                             var $this = $(this);
-                            settings.mouseleave.call($this, input, $this.is(opt.next) ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
+                            settings.mouseleave.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
                         });
                     opt.next.add(opt.prev).on('click.' + $.plusMinus.nS, function(e) {
                         methods._changeCount.call(this, $(this).data('plusMinus'));
@@ -124,15 +124,15 @@
             var $this = $(this),
                     data = $this.data('plusMinus');
             val = val !== undefined ? val : $this.val();
-            return val.toString().indexOf(data.divider) === -1 ? val : val.toString().replace(data.divider, '.');
+            return methods._valS(val, data.divider);
         },
         setValue: function(val, noChange) {
             var $this = $(this),
                     data = $this.data('plusMinus');
-            val = val.toString().indexOf('.') === -1 ? val : val.toString().replace('.', data.divider);
+            var valF = methods._valF(val, data.divider);
             var cP = methods._getCursorPosition.call($this);
             function _change() {
-                $this.val(val);
+                $this.val(valF);
                 methods._setCursorPosition.call($this, cP);
                 data.val = val;
             }
@@ -163,28 +163,35 @@
             methods._enabled.call(data.next.add(data.prev));
             setTimeout(function() {
                 var nVal = methods.getValue.call(input);
+
                 if (nVal.toString().match(data.pattern))
                     methods.setValue.call(input, nVal, start);
                 else if (val.toString().match(data.pattern))
                     methods.setValue.call(input, val);
-                else if (data.val && methods.getValue.call(input, data.val).toString().match(data.pattern))
-                    methods.setValue.call(input, methods.getValue.call(input, data.val));
+                else if (data.val !== undefined && data.val.toString().match(data.pattern))
+                    methods.setValue.call(input, data.val);
                 else {
                     methods.setValue.call(input, methods.getValue.call(input, data.value));
                     methods._disabled.call(data.prev);
                 }
 
                 nVal = methods.getValue.call(input);
-                if (nVal && +nVal <= data.min) {
+                if (nVal !== undefined && +nVal <= data.min) {
                     methods.setValue.call(input, data.min, start);
                     methods._disabled.call(data.prev);
                 }
-                if (nVal && +nVal >= data.max) {
+                if (nVal !== undefined && +nVal >= data.max) {
                     methods.setValue.call(input, data.max, start);
                     methods._disabled.call(data.next);
                 }
             }, 0);
             return input;
+        },
+        _valF: function(val, divider) {
+            return val.toString().indexOf('.') === -1 ? val : val.toString().replace('.', divider);
+        },
+        _valS: function(val, divider) {
+            return val.toString().indexOf(divider) === -1 ? val : val.toString().replace(divider, '.');
         },
         _setCursorPosition: function(pos) {
             if (!isTouch)
@@ -214,11 +221,9 @@
         _nextValue: function(value, next) {
             var $this = $(this),
                     data = $this.data('plusMinus'),
-                    val = next ? data.max : data.min,
                     lZeroS = data.step.toString().split('0').length - 1,
                     nextVal = +((isNaN(value) ? (data.min.toString() === "-Infinity" ? 0 : data.min) : value) + (next ? data.step : -data.step)).toFixed(lZeroS);
-            if (!next && val !== -Infinity)
-                nextVal = nextVal - (+((nextVal - val) % data.step).toFixed(lZeroS) === 0 ? 0 : +((nextVal - val) % data.step).toFixed(lZeroS) - data.step);
+            
             nextVal = +nextVal.toFixed(lZeroS);
             return nextVal;
         },
@@ -227,6 +232,7 @@
                     data = opt.input.data('plusMinus'),
                     val = opt.next ? data.max : data.min;
             var nextVal = methods._nextValue.call(opt.input, parseFloat(methods.getValue.call(opt.input)), opt.next);
+
             if (nextVal <= val && opt.next || nextVal >= val && !opt.next) {
                 methods._enabled.call(opt.next ? data.prev : data.next);
                 methods.setValue.call(opt.input, nextVal);

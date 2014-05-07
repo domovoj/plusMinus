@@ -156,9 +156,13 @@
                 }
             });
             $('#hover').plusMinus({
+                divider: '|',
                 mouseenter: function(input, type) {
                     var iH = setInterval(function() {
                         input.plusMinus(type);
+                        var data = input.data('plusMinus');
+                        if (data.val === data.max || data.val === data.min)
+                            clearInterval(iH);
                     }, 500)
                     return iH;
                 },
