@@ -14,9 +14,8 @@
             var $this = $(this),
                     data = $this.data('plusMinus');
             if (data) {
-                console.log(data.prev.data('plusMinus').disabled)
-                data.next.data('plusMinus').disabled ? data.next.attr('disabled', 'disabled') : data.next.removeAttr('disabled');
-                data.prev.data('plusMinus').disabled ? data.prev.attr('disabled', 'disabled') : data.prev.removeAttr('disabled');
+                data.next.data('plusminusDisabled') ? data.next.attr('disabled', 'disabled') : data.next.removeAttr('disabled');
+                data.prev.data('plusminusDisabled') ? data.prev.attr('disabled', 'disabled') : data.prev.removeAttr('disabled');
                 data.next.add(data.prev).off('mouseenter.' + $.plusMinus.nS).off('mouseleave.' + $.plusMinus.nS).off('click.' + $.plusMinus.nS).off('mouseup.' + $.plusMinus.nS).off('mousedown.' + $.plusMinus.nS).removeData('plusMinus').removeClass('plusMinus-disabled plusMinus-enabled');
                 $this.val(data.bval).off('input.' + $.plusMinus.nS).removeData('plusMinus');
             }
@@ -29,6 +28,8 @@
                 return this.each(function() {
                     var input = $(this),
                             data = input.data();
+
+                    methods.destroy.call(input);
 
                     var opt = {};
                     for (var i in $.plusMinus.dP)
@@ -50,17 +51,15 @@
                     };
                     delete opt.before;
                     delete opt.after;
-                    opt.next.data('plusMinus', $.extend({next: true, disabled: opt.next.is(':disabled') ? true : false}, dP));
-                    opt.prev.data('plusMinus', $.extend({next: false, disabled: opt.prev.is(':disabled') ? true : false}, dP));
-                    
-                    methods.destroy.call(input);
-
-                    input.data('plusMinus', opt);
                     var dP = {
                         input: input
                     };
                     if (opt.mouseDownChange)
                         dP.interval = [];
+                    opt.next.data('plusMinus', $.extend({next: true}, dP)).data('plusminusDisabled', opt.next.is(':disabled') ? true : false);
+                    opt.prev.data('plusMinus', $.extend({next: false}, dP)).data('plusminusDisabled', opt.prev.is(':disabled') ? true : false);
+
+                    input.data('plusMinus', opt);
 
                     methods.testNumber.call(input, true);
                     var inputJS = $(this).get(0);
