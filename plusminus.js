@@ -14,11 +14,11 @@
             var $this = $(this),
                     data = $this.data('plusMinus');
             if (data) {
+                console.log(data.prev.data('plusMinus').disabled)
+                data.next.data('plusMinus').disabled ? data.next.attr('disabled', 'disabled') : data.next.removeAttr('disabled');
+                data.prev.data('plusMinus').disabled ? data.prev.attr('disabled', 'disabled') : data.prev.removeAttr('disabled');
                 data.next.add(data.prev).off('mouseenter.' + $.plusMinus.nS).off('mouseleave.' + $.plusMinus.nS).off('click.' + $.plusMinus.nS).off('mouseup.' + $.plusMinus.nS).off('mousedown.' + $.plusMinus.nS).removeData('plusMinus').removeClass('plusMinus-disabled plusMinus-enabled');
-                $this.off('input.' + $.plusMinus.nS).removeData('plusMinus');
-                data.next.add(data.prev).each(function() {
-
-                });
+                $this.val(data.bval).off('input.' + $.plusMinus.nS).removeData('plusMinus');
             }
             return $this;
         },
@@ -29,12 +29,13 @@
                 return this.each(function() {
                     var input = $(this),
                             data = input.data();
-                    methods.destroy.call(input);
+
                     var opt = {};
                     for (var i in $.plusMinus.dP)
                         opt[i] = methods._checkProp.call([i], data, settings);
                     opt.next = typeof opt.next === 'string' ? methods._checkBtn.call(input, opt.next.split('.')) : opt.next;
                     opt.prev = typeof opt.prev === 'string' ? methods._checkBtn.call(input, opt.prev.split('.')) : opt.prev;
+                    opt.bval = input.val();
                     opt.callbacks = {
                         before: {
                             beforeG: $.plusMinus.dP.before,
@@ -49,7 +50,18 @@
                     };
                     delete opt.before;
                     delete opt.after;
+                    opt.next.data('plusMinus', $.extend({next: true, disabled: opt.next.is(':disabled') ? true : false}, dP));
+                    opt.prev.data('plusMinus', $.extend({next: false, disabled: opt.prev.is(':disabled') ? true : false}, dP));
+                    
+                    methods.destroy.call(input);
+
                     input.data('plusMinus', opt);
+                    var dP = {
+                        input: input
+                    };
+                    if (opt.mouseDownChange)
+                        dP.interval = [];
+
                     methods.testNumber.call(input, true);
                     var inputJS = $(this).get(0);
                     if ("onpropertychange" in inputJS)
@@ -61,14 +73,6 @@
                         input.on('input.' + $.plusMinus.nS, function(e) {
                             methods.testNumber.call($(this));
                         });
-
-                    var dP = {
-                        input: input
-                    };
-                    if (opt.mouseDownChange)
-                        dP.interval = [];
-                    opt.next.data('plusMinus', $.extend({next: true}, dP));
-                    opt.prev.data('plusMinus', $.extend({next: false}, dP));
 
                     if (settings.mouseenter)
                         opt.next.add(opt.prev).on('mouseenter.' + $.plusMinus.nS, function(e) {

@@ -12,7 +12,7 @@
     <body>
         <form class="form-inline" role="form" style="padding: 20px">
             <h3>Simple Plusminus</h3>
-            <button type="button" class="btn btn-primary btn-sm">
+            <button type="button" class="btn btn-primary btn-sm" disabled="disabled">
                 -
             </button>
             <input type="text" class="plusMinus plus-minus form-control input-sm">
