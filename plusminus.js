@@ -133,7 +133,7 @@
             var cP = methods._getCursorPosition.call(input);
             function _change() {
                 input.val(valF);
-                methods._setCursorPosition.call(input, cP);
+                methods._setCursorPosition.call(input, cP - ((data.val ? data.val.toString().length : null) === val.toString().length ? 1 : 0));
                 data.val = +val;
             }
             if (!noChange && data.val !== val) {
