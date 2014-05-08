@@ -42,7 +42,7 @@
             <button type="button" class="btn btn-primary btn-sm">
                 -
             </button>
-            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="50" data-step="0.01" value="-5">
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="5.1" data-step="0.01" value="-5">
             <button type="button" class="btn btn-primary btn-sm">
                 +
             </button>
@@ -51,7 +51,16 @@
             <button type="button" class="btn btn-primary btn-sm">
                 -
             </button>
-            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="50" data-step="0.01" value="5" data-divider="|">
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="50" data-step="0.01" value="4.9" data-divider="|">
+            <button type="button" class="btn btn-primary btn-sm">
+                +
+            </button>
+            <!--------------------->
+            <h3>Plusminus precision</h3>
+            <button type="button" class="btn btn-primary btn-sm">
+                -
+            </button>
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="50" data-step="0.01" value="-4.90" data-precision="true">
             <button type="button" class="btn btn-primary btn-sm">
                 +
             </button>
@@ -156,7 +165,6 @@
                 }
             });
             $('#hover').plusMinus({
-                divider: '|',
                 mouseenter: function(input, type) {
                     var iH = setInterval(function() {
                         input.plusMinus(type);
