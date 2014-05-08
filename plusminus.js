@@ -163,24 +163,22 @@
             methods._enabled.call(data.next.add(data.prev));
             setTimeout(function() {
                 var nVal = methods.getValue.call(input);
-
                 if (nVal.toString().match(data.pattern))
                     methods.setValue.call(input, nVal, start);
                 else if (val.toString().match(data.pattern))
                     methods.setValue.call(input, val);
-                else if (data.val !== undefined && data.val.toString().match(data.pattern))
-                    methods.setValue.call(input, data.val);
                 else {
                     methods.setValue.call(input, methods.getValue.call(input, data.value));
                     methods._disabled.call(data.prev);
                 }
 
                 nVal = methods.getValue.call(input);
-                if (nVal !== undefined && +nVal <= data.min) {
+                if (nVal !== undefined && nVal <= data.min) {
                     methods.setValue.call(input, data.min, start);
                     methods._disabled.call(data.prev);
                 }
-                if (nVal !== undefined && +nVal >= data.max) {
+//                 || !methods._nextValue.call(input, methods.getValue.call(input), true).toString().match(data.pattern)
+                if (nVal !== undefined && nVal >= data.max) {
                     methods.setValue.call(input, data.max, start);
                     methods._disabled.call(data.next);
                 }
@@ -191,7 +189,7 @@
             return val.toString().indexOf('.') === -1 ? val : val.toString().replace('.', divider);
         },
         _valS: function(val, divider) {
-            return val.toString().indexOf(divider) === -1 ? val : val.toString().replace(divider, '.');
+            return +(val.toString().indexOf(divider) === -1 ? val : val.toString().replace(divider, '.'));
         },
         _setCursorPosition: function(pos) {
             if (!isTouch)
@@ -221,17 +219,15 @@
         _nextValue: function(value, next) {
             var $this = $(this),
                     data = $this.data('plusMinus'),
-                    lZeroS = data.step.toString().split('0').length - 1,
-                    nextVal = +((isNaN(value) ? (data.min.toString() === "-Infinity" ? 0 : data.min) : value) + (next ? data.step : -data.step)).toFixed(lZeroS);
+                    lZeroS = data.step.toString().split('0').length - 1;
             
-            nextVal = +nextVal.toFixed(lZeroS);
-            return nextVal;
+            return +(+((isNaN(value) ? (data.min.toString() === "-Infinity" ? 0 : data.min) : value) + (next ? data.step : -data.step)).toFixed(lZeroS));
         },
         _changeCount: function(opt) {
             var el = $(this),
                     data = opt.input.data('plusMinus'),
                     val = opt.next ? data.max : data.min;
-            var nextVal = methods._nextValue.call(opt.input, parseFloat(methods.getValue.call(opt.input)), opt.next);
+            var nextVal = methods._nextValue.call(opt.input, methods.getValue.call(opt.input), opt.next);
 
             if (nextVal <= val && opt.next || nextVal >= val && !opt.next) {
                 methods._enabled.call(opt.next ? data.prev : data.next);
