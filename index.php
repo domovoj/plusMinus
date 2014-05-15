@@ -168,6 +168,36 @@
             <button type="button" class="btn btn-primary btn-sm">
                 +
             </button>
+            <!--------------------->
+            <h3>Plusminus disabled|enabled</h3>
+            <button type="button" class="btn btn-primary btn-sm">
+                -
+            </button>
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="5" data-step="0.1" value="5" id="disableEnable">
+            <button type="button" class="btn btn-primary btn-sm">
+                +
+            </button>
+            <button type="button" class="btn btn-sm" onclick="$('#disableEnable').plusMinus('disable')">
+                disabled
+            </button>
+            <button type="button" class="btn btn-sm" onclick="$('#disableEnable').plusMinus('enable')">
+                enabled
+            </button>
+            <!--------------------->
+            <h3>Plusminus get and set value</h3>
+            <button type="button" class="btn btn-primary btn-sm">
+                -
+            </button>
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="5" data-step="0.1" value="0" data-divider="|" id="setgetvalue">
+            <button type="button" class="btn btn-primary btn-sm">
+                +
+            </button>
+            <button type="button" class="btn btn-sm" onclick="$('#setgetvalue').plusMinus('setValue', 4.5)">
+                set value 4.5
+            </button>
+            <button type="button" class="btn btn-sm" onclick="alert($('#setgetvalue').plusMinus('getValue'))">
+                get value
+            </button>
         </form>
         <?php
         ?>
@@ -198,7 +228,7 @@
                         var data = input.data('plusMinus');
                         if (data.val === data.max || data.val === data.min)
                             clearInterval(iH);
-                    }, 500)
+                    }, 500);
                     return iH;
                 },
                 mouseleave: function(input, type, res) {

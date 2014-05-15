@@ -125,7 +125,7 @@
                     data = input.data('plusMinus');
             return methods._valS(val !== undefined ? val : input.val().replace(data.sufix ? data.sufix : '', '').replace(data.prefix ? data.prefix : '', ''), data.divider);
         },
-        setValue: function(val, noChange) {
+        setValue: function(val, ins, noChange) {
             var input = $(this),
                     data = input.data('plusMinus');
 
@@ -133,6 +133,8 @@
             var cP = methods._getCursorPosition.call(input);
             function _change() {
                 input.val((data.prefix ? data.prefix : '') + valF + (data.sufix ? data.sufix : ''));
+                if (!ins)
+                    cP = input.val().toString().length + 1;
                 methods._setCursorPosition.call(input, cP - ((data.val ? data.val.toString().length : null) === val.toString().length ? 1 : 0), noChange);
                 data.val = +val;
             }
@@ -187,7 +189,7 @@
                     methods._disabled.call(data.next);
                 }
             }
-            methods.setValue.call(input, val, start);
+            methods.setValue.call(input, val, true, start);
 
             return input;
         },
@@ -237,16 +239,40 @@
 
             if (nextVal <= limit && opt.next || nextVal >= limit && !opt.next) {
                 methods._enabled.call(opt.next ? data.prev : data.next);
-                methods.setValue.call(opt.input, nextVal);
+                methods.setValue.call(opt.input, nextVal, true);
             }
             else if (data.overflow)
-                methods.setValue.call(opt.input, opt.next ? data.min : data.max);
+                methods.setValue.call(opt.input, opt.next ? data.min : data.max, true);
 
             methods._setCursorPosition.call(opt.input, opt.input.val().length);
-            
-            if ((nextVal == limit && opt.next || nextVal == limit && !opt.next) && !opt.overflow)
+
+            if ((nextVal == limit && opt.next || nextVal == limit && !opt.next) && !data.overflow)
                 methods._disabled.call(el);
             return el;
+        },
+        enable: function() {
+            var $this = $(this),
+                    data = $this.data('plusMinus');
+            if (data.next.data('plusminusDisabledC') !== undefined && data.next.data('plusminusDisabledC') === false)
+                data.next.removeAttr('disabled').removeClass('plusMinus-disabled');
+            if (data.prev.data('plusminusDisabledC') !== undefined && data.prev.data('plusminusDisabledC') === false)
+                data.prev.removeAttr('disabled').removeClass('plusMinus-disabled');
+            return $this.removeAttr('disabled').removeClass('plusMinus-disabled').addClass('plusMinus-enabled');
+        },
+        disable: function() {
+            var $this = $(this),
+                    data = $this.data('plusMinus');
+            if ($this.hasClass('plusMinus-disabled'))
+                return $this;
+            if (data.next.is(':disabled'))
+                data.next.data('plusminusDisabledC', true);
+            else
+                data.next.data('plusminusDisabledC', false);
+            if (data.prev.is(':disabled'))
+                data.prev.data('plusminusDisabledC', true);
+            else
+                data.prev.data('plusminusDisabledC', false);
+            return $this.removeClass('plusMinus-enabled').add(data.next).add(data.prev).attr('disabled', 'disabled').addClass('plusMinus-disabled');
         },
         _enabled: function() {
             return $(this).removeAttr('disabled').removeClass('plusMinus-disabled').addClass('plusMinus-enabled');
