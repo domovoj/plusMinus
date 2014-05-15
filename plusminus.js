@@ -243,8 +243,8 @@
                 methods.setValue.call(opt.input, opt.next ? data.min : data.max);
 
             methods._setCursorPosition.call(opt.input, opt.input.val().length);
-
-            if ((nextVal === limit && opt.next || nextVal === limit && !opt.next) && !opt.overflow)
+            
+            if ((nextVal == limit && opt.next || nextVal == limit && !opt.next) && !opt.overflow)
                 methods._disabled.call(el);
             return el;
         },
