@@ -65,7 +65,7 @@
                     var inputJS = $(this).get(0);
                     if ("onpropertychange" in inputJS)
                         inputJS.onpropertychange = function() {
-                            if (event.propertyName == "value")
+                            if (event.propertyName === "value")
                                 methods.testNumber.call(input);
                         };
                     else
@@ -123,7 +123,7 @@
         getValue: function(val) {
             var input = $(this),
                     data = input.data('plusMinus');
-            return methods._valS(val !== undefined ? val : input.val(), data.divider);
+            return methods._valS(val !== undefined ? val : input.val().replace(data.sufix ? data.sufix : '', '').replace(data.prefix ? data.prefix : '', ''), data.divider);
         },
         setValue: function(val, noChange) {
             var input = $(this),
@@ -132,7 +132,7 @@
             var valF = methods._valF(data.precision || isNaN(parseFloat(val)) ? val : parseFloat(val), data.divider);
             var cP = methods._getCursorPosition.call(input);
             function _change() {
-                input.val(valF);
+                input.val((data.prefix ? data.prefix : '') + valF + (data.sufix ? data.sufix : ''));
                 methods._setCursorPosition.call(input, cP - ((data.val ? data.val.toString().length : null) === val.toString().length ? 1 : 0), noChange);
                 data.val = +val;
             }
@@ -144,8 +144,10 @@
                         resB[i] = data.callbacks.before[i].call(input, data);
                         resBA.push(resB[i]);
                     }
+                input.trigger('before.' + $.plusMinus.nS, data);
                 if ($.inArray(false, resBA) === -1 || resBA.length === 0) {
                     _change();
+                    input.trigger('after.' + $.plusMinus.nS, data);
                     if (!noChange)
                         for (var i in data.callbacks.after)
                             if (data.callbacks.after[i])
@@ -236,9 +238,13 @@
             if (nextVal <= limit && opt.next || nextVal >= limit && !opt.next) {
                 methods._enabled.call(opt.next ? data.prev : data.next);
                 methods.setValue.call(opt.input, nextVal);
-                methods._setCursorPosition.call(opt.input, opt.input.val().length);
             }
-            if (nextVal == limit && opt.next || nextVal == limit && !opt.next)
+            else if (data.overflow)
+                methods.setValue.call(opt.input, opt.next ? data.min : data.max);
+
+            methods._setCursorPosition.call(opt.input, opt.input.val().length);
+
+            if ((nextVal === limit && opt.next || nextVal === limit && !opt.next) && !opt.overflow)
                 methods._disabled.call(el);
             return el;
         },
@@ -317,7 +323,10 @@
             mouseDownChange: true,
             precision: false,
             before: null,
-            after: null
+            after: null,
+            prefix: null,
+            sufix: null,
+            overflow: false
         };
         this.setParameters = function(options) {
             $.extend(this.dP, options);

@@ -124,11 +124,38 @@
                 +
             </button>
             <!--------------------->
+            <h3>Plusminus with prefix</h3>
+            <button type="button" class="btn btn-primary btn-sm">
+                -
+            </button>
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="50" data-step="0.1" value="5.0" data-prefix="$ " data-precision="true">
+            <button type="button" class="btn btn-primary btn-sm">
+                +
+            </button>
+            <!--------------------->
+            <h3>Plusminus with sufix</h3>
+            <button type="button" class="btn btn-primary btn-sm">
+                -
+            </button>
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="50" data-step="0.1" value="5.0" data-sufix=" $" data-precision="true">
+            <button type="button" class="btn btn-primary btn-sm">
+                +
+            </button>
+            <!--------------------->
+            <h3>Plusminus overflow</h3>
+            <button type="button" class="btn btn-primary btn-sm">
+                -
+            </button>
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-min="-5" data-max="5" data-step="1" value="0" data-overflow="true">
+            <button type="button" class="btn btn-primary btn-sm">
+                +
+            </button>
+            <!--------------------->
             <h3>Plusminus callbacks</h3>
             <button type="button" class="btn btn-primary btn-sm">
                 -
             </button>
-            <input type="text" class="plusMinus plus-minus form-control input-sm" id="callbacks" data-min="-5" data-max="50" data-step="0.01" value="-4.99" data-before="function(){return prompt('before change. Before element say?');}" data-after="function(opt, res){alert('after change. After of element says - '+res.beforeEl);}">
+            <input type="text" class="plusMinus plus-minus form-control input-sm" id="callbacks" data-min="-5" data-mouse-down-change="false" data-max="50" data-step="0.01" value="-4.99" data-before="function(){return prompt('before change. Before element say?');}" data-after="function(opt, res){alert('after change. After of element says - '+res.beforeEl);}">
             <button type="button" class="btn btn-primary btn-sm">
                 +
             </button>
