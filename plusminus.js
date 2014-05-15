@@ -133,7 +133,7 @@
             var cP = methods._getCursorPosition.call(input);
             function _change() {
                 input.val(valF);
-                methods._setCursorPosition.call(input, cP - ((data.val ? data.val.toString().length : null) === val.toString().length ? 1 : 0));
+                methods._setCursorPosition.call(input, cP - ((data.val ? data.val.toString().length : null) === val.toString().length ? 1 : 0), noChange);
                 data.val = +val;
             }
             if (!noChange && data.val !== val) {
@@ -175,8 +175,7 @@
                 else
                     val = data.value;
             }
-
-            if (val) {
+            if (val && val.toString().match(data.pattern)) {
                 if (val <= data.min) {
                     val = data.min;
                     methods._disabled.call(data.prev);
@@ -196,8 +195,8 @@
         _valS: function(val, divider) {
             return val.toString().indexOf(divider) === -1 ? val : val.toString().replace(divider, '.');
         },
-        _setCursorPosition: function(pos) {
-            if (!isTouch)
+        _setCursorPosition: function(pos, change) {
+            if (!isTouch && !change)
                 this.each(function() {
                     this.select();
                     try {
