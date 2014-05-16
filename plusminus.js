@@ -359,5 +359,8 @@
         };
     };
     $.plusMinus = new $.plusMinusInit();
+    $(document).ready(function(){
+        $('[data-rel="plusMinus"]').plusMinus();
+    });
 })($, 'ontouchstart' in document.documentElement);
 /*/plugin plusminus end*/
