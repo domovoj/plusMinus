@@ -82,13 +82,13 @@
                         input.on('input.' + $.plusMinus.nS, function(e) {
                             methods.testNumber.call($(this));
                         });
-                    
+
                     var btns = $([]);
                     if (opt.next)
                         btns = btns.add(opt.next);
                     if (opt.prev)
                         btns = btns.add(opt.prev);
-                    
+
                     if (btns && settings.mouseenter)
                         btns.on('mouseenter.' + $.plusMinus.nS, function(e) {
                             var $this = $(this);
@@ -145,7 +145,8 @@
             var input = $(this),
                     data = input.data('plusMinus');
 
-            var valF = methods._valF(data.precision || isNaN(parseFloat(val)) ? val : parseFloat(val), data.divider);
+            var valF = methods._valF(data.precision || !methods._isNumber(val) || !methods._isNumber(val.toString()[val.toString().length - 1]) ? val : parseFloat(val), data.divider);
+
             var cP = methods._getCursorPosition.call(input);
             function _change() {
                 input.val((data.prefix ? data.prefix : '') + valF + (data.sufix ? data.sufix : ''));
@@ -198,11 +199,11 @@
                     val = data.value;
             }
             if (val && val.toString().match(data.pattern)) {
-                if (data.prev && val <= data.min) {
+                if (val <= data.min) {
                     val = data.min;
                     methods._disabled.call(data.prev);
                 }
-                if (data.next && val >= data.max) {
+                if (val >= data.max) {
                     val = data.max;
                     methods._disabled.call(data.next);
                 }
@@ -252,8 +253,17 @@
         _changeCount: function(opt) {
             var el = $(this),
                     data = opt.input.data('plusMinus'),
-                    limit = opt.next ? data.max : data.min;
-            var nextVal = methods._nextValue.call(opt.input, +methods.getValue.call(opt.input), opt.next);
+                    limit = opt.next ? data.max : data.min,
+                    curVal = +methods.getValue.call(opt.input),
+                    nextVal = methods._nextValue.call(opt.input, curVal, opt.next);
+
+            if (!opt.next) {
+                var difVal = parseFloat((curVal - data.min) % data.step)
+                if (difVal > 0)
+                    nextVal = curVal - difVal
+                if (difVal < 0)
+                    nextVal = data.min;
+            }
 
             if (nextVal <= limit && opt.next || nextVal >= limit && !opt.next) {
                 methods._enabled.call(opt.next ? data.prev : data.next);
@@ -324,9 +334,12 @@
             });
             return btn;
         },
+        _isNumber: function(number) {
+            return !isNaN(parseFloat(number)) && isFinite(number)
+        },
         _checkProp: function(elSet, opt) {
             var prop = this[0];
-            if (!isNaN(parseFloat($.plusMinus.dP[prop])) && isFinite($.plusMinus.dP[prop]))
+            if (methods._isNumber($.plusMinus.dP[prop]))
                 return +((elSet[prop] !== undefined && elSet[prop] !== null ? elSet[prop].toString() : elSet[prop]) || (opt[prop] !== undefined && opt[prop] !== null ? opt[prop].toString() : opt[prop]));
             if ($.plusMinus.dP[prop] !== undefined && $.plusMinus.dP[prop] !== null && ($.plusMinus.dP[prop].toString().toLowerCase() === 'false' || $.plusMinus.dP[prop].toString().toLowerCase() === 'true'))
                 return elSet[prop] !== undefined && elSet[prop] !== null ? ((/^true$/i).test(elSet[prop].toString().toLowerCase())) : (/^true$/i).test(opt[prop].toString().toLowerCase());
