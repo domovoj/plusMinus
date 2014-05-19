@@ -14,9 +14,17 @@
             var input = $(this),
                     data = input.data('plusMinus');
             if (data) {
-                data.next.data('plusminusDisabled') ? data.next.attr('disabled', 'disabled') : data.next.removeAttr('disabled');
-                data.prev.data('plusminusDisabled') ? data.prev.attr('disabled', 'disabled') : data.prev.removeAttr('disabled');
-                data.next.add(data.prev).off('mouseenter.' + $.plusMinus.nS).off('mouseleave.' + $.plusMinus.nS).off('click.' + $.plusMinus.nS).off('mouseup.' + $.plusMinus.nS).off('mousedown.' + $.plusMinus.nS).removeData('plusMinus').removeClass('plusMinus-disabled plusMinus-enabled');
+                var btns = $([]);
+                if (data.next) {
+                    data.next.data('plusminusDisabled') ? data.next.attr('disabled', 'disabled') : data.next.removeAttr('disabled');
+                    btns = btns.add(data.next)
+                }
+                if (data.prev) {
+                    data.prev.data('plusminusDisabled') ? data.prev.attr('disabled', 'disabled') : data.prev.removeAttr('disabled');
+                    btns = btns.add(data.prev)
+                }
+                if (btns)
+                    btns.off('mouseenter.' + $.plusMinus.nS).off('mouseleave.' + $.plusMinus.nS).off('click.' + $.plusMinus.nS).off('mouseup.' + $.plusMinus.nS).off('mousedown.' + $.plusMinus.nS).removeData('plusMinus').removeClass('plusMinus-disabled plusMinus-enabled');
                 input.val(data.bval).off('input.' + $.plusMinus.nS).removeData('plusMinus');
             }
             return input;
@@ -74,22 +82,23 @@
                         input.on('input.' + $.plusMinus.nS, function(e) {
                             methods.testNumber.call($(this));
                         });
-
-                    if (settings.mouseenter)
-                        opt.next.add(opt.prev).on('mouseenter.' + $.plusMinus.nS, function(e) {
-                            var $this = $(this);
-                            $this.data('plusMinus').resMouseEnter = settings.mouseenter.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus');
-                        });
-                    if (settings.mouseleave)
-                        opt.next.add(opt.prev).on('mouseleave.' + $.plusMinus.nS, function(e) {
-                            var $this = $(this);
-                            settings.mouseleave.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
-                        });
+                    
                     var btns = $([]);
                     if (opt.next)
                         btns = btns.add(opt.next);
                     if (opt.prev)
                         btns = btns.add(opt.prev);
+                    
+                    if (btns && settings.mouseenter)
+                        btns.on('mouseenter.' + $.plusMinus.nS, function(e) {
+                            var $this = $(this);
+                            $this.data('plusMinus').resMouseEnter = settings.mouseenter.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus');
+                        });
+                    if (btns && settings.mouseleave)
+                        btns.on('mouseleave.' + $.plusMinus.nS, function(e) {
+                            var $this = $(this);
+                            settings.mouseleave.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
+                        });
                     btns.on('click.' + $.plusMinus.nS, function(e) {
                         methods._changeCount.call(this, $(this).data('plusMinus'));
                     }).on('mouseup.' + $.plusMinus.nS, function(e) {
