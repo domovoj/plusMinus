@@ -25,7 +25,7 @@
             options = options || {};
             if (this.length > 0) {
                 var settings = $.extend({}, $.plusMinus.dP, options);
-                return this.each(function() {
+                return this.each(function(ind) {
                     var input = $(this),
                             data = input.data();
 
@@ -56,8 +56,10 @@
                     };
                     if (opt.mouseDownChange)
                         dP.interval = [];
-                    opt.next.data('plusMinus', $.extend({next: true}, dP)).data('plusminusDisabled', opt.next.is(':disabled') ? true : false);
-                    opt.prev.data('plusMinus', $.extend({next: false}, dP)).data('plusminusDisabled', opt.prev.is(':disabled') ? true : false);
+                    if (opt.next)
+                        opt.next.data('plusMinus', $.extend({next: true}, dP)).data('plusminusDisabled', opt.next.is(':disabled') ? true : false);
+                    if (opt.prev)
+                        opt.prev.data('plusMinus', $.extend({next: false}, dP)).data('plusminusDisabled', opt.prev.is(':disabled') ? true : false);
 
                     input.data('plusMinus', opt);
 
@@ -83,14 +85,19 @@
                             var $this = $(this);
                             settings.mouseleave.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
                         });
-                    opt.next.add(opt.prev).on('click.' + $.plusMinus.nS, function(e) {
+                    var btns = $([]);
+                    if (opt.next)
+                        btns = btns.add(opt.next);
+                    if (opt.prev)
+                        btns = btns.add(opt.prev);
+                    btns.on('click.' + $.plusMinus.nS, function(e) {
                         methods._changeCount.call(this, $(this).data('plusMinus'));
                     }).on('mouseup.' + $.plusMinus.nS, function(e) {
                         if (!isTouch)
                             input.focus();
                     });
                     if (opt.mouseDownChange) {
-                        opt.next.add(opt.prev).on('mousedown.' + $.plusMinus.nS, function(e) {
+                        btns.on('mousedown.' + $.plusMinus.nS, function(e) {
                             var _self = this,
                                     obj = $(_self).data('plusMinus');
                             obj.interval[0] = setTimeout(function() {
@@ -159,9 +166,9 @@
             else
                 _change();
 
-            if (!methods._nextValue.call(input, +val, false).toString().match(data.pattern))
+            if (!methods._nextValue.call(input, +val, false).toString().match(data.pattern) && data.prev)
                 methods._disabled.call(data.prev);
-            if (!methods._nextValue.call(input, +val, true).toString().match(data.pattern))
+            if (!methods._nextValue.call(input, +val, true).toString().match(data.pattern) && data.next)
                 methods._disabled.call(data.next);
 
             return val;
@@ -170,8 +177,10 @@
             var input = $(this),
                     val = methods.getValue.call(input),
                     data = input.data('plusMinus');
-
-            methods._enabled.call(data.next.add(data.prev));
+            if (data.next)
+                methods._enabled.call(data.next);
+            if (data.prev)
+                methods._enabled.call(data.prev);
 
             if (val !== undefined && !val.toString().match(data.pattern)) {
                 if (data.val !== undefined && data.val.toString().match(data.pattern))
@@ -180,11 +189,11 @@
                     val = data.value;
             }
             if (val && val.toString().match(data.pattern)) {
-                if (val <= data.min) {
+                if (data.prev && val <= data.min) {
                     val = data.min;
                     methods._disabled.call(data.prev);
                 }
-                if (val >= data.max) {
+                if (data.next && val >= data.max) {
                     val = data.max;
                     methods._disabled.call(data.next);
                 }
@@ -253,9 +262,9 @@
         enable: function() {
             var $this = $(this),
                     data = $this.data('plusMinus');
-            if (data.next.data('plusminusDisabledC') !== undefined && data.next.data('plusminusDisabledC') === false)
+            if (data.next && data.next.data('plusminusDisabledC') !== undefined && data.next.data('plusminusDisabledC') === false)
                 data.next.removeAttr('disabled').removeClass('plusMinus-disabled');
-            if (data.prev.data('plusminusDisabledC') !== undefined && data.prev.data('plusminusDisabledC') === false)
+            if (data.prev && data.prev.data('plusminusDisabledC') !== undefined && data.prev.data('plusminusDisabledC') === false)
                 data.prev.removeAttr('disabled').removeClass('plusMinus-disabled');
             return $this.removeAttr('disabled').removeClass('plusMinus-disabled').addClass('plusMinus-enabled');
         },
@@ -264,14 +273,18 @@
                     data = $this.data('plusMinus');
             if ($this.hasClass('plusMinus-disabled'))
                 return $this;
-            if (data.next.is(':disabled'))
-                data.next.data('plusminusDisabledC', true);
-            else
-                data.next.data('plusminusDisabledC', false);
-            if (data.prev.is(':disabled'))
-                data.prev.data('plusminusDisabledC', true);
-            else
-                data.prev.data('plusminusDisabledC', false);
+            if (data.next) {
+                if (data.next.is(':disabled'))
+                    data.next.data('plusminusDisabledC', true);
+                else
+                    data.next.data('plusminusDisabledC', false);
+            }
+            if (data.prev) {
+                if (data.prev.is(':disabled'))
+                    data.prev.data('plusminusDisabledC', true);
+                else
+                    data.prev.data('plusminusDisabledC', false);
+            }
             return $this.removeClass('plusMinus-enabled').add(data.next).add(data.prev).attr('disabled', 'disabled').addClass('plusMinus-disabled');
         },
         _enabled: function() {
@@ -308,8 +321,9 @@
                 return +((elSet[prop] !== undefined && elSet[prop] !== null ? elSet[prop].toString() : elSet[prop]) || (opt[prop] !== undefined && opt[prop] !== null ? opt[prop].toString() : opt[prop]));
             if ($.plusMinus.dP[prop] !== undefined && $.plusMinus.dP[prop] !== null && ($.plusMinus.dP[prop].toString().toLowerCase() === 'false' || $.plusMinus.dP[prop].toString().toLowerCase() === 'true'))
                 return elSet[prop] !== undefined && elSet[prop] !== null ? ((/^true$/i).test(elSet[prop].toString().toLowerCase())) : (/^true$/i).test(opt[prop].toString().toLowerCase());
-            else
-                return elSet[prop] || (opt[prop] ? opt[prop] : false);
+            else {
+                return elSet[prop] !== undefined ? elSet[prop] : (opt[prop] ? opt[prop] : false);
+            }
         }
     };
     $.fn.plusMinus = function(method) {
@@ -359,7 +373,7 @@
         };
     };
     $.plusMinus = new $.plusMinusInit();
-    $(document).ready(function(){
+    $(document).ready(function() {
         $('[data-rel="plusMinus"]').plusMinus();
     });
 })($, 'ontouchstart' in document.documentElement);

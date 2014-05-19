@@ -20,6 +20,9 @@
                 +
             </button>
             <!--------------------->
+            <h3>Simple Plusminus without prev/next</h3>
+            <input type="text" class="plusMinus plus-minus form-control input-sm" data-next="null" data-prev="null">
+            <!--------------------->
             <h3>Plusminus with min and max values [-5;+5]</h3>
             <button type="button" class="btn btn-primary btn-sm">
                 -
@@ -199,11 +202,9 @@
                 get value
             </button>
         </form>
-        <?php
-        ?>
         <script type="text/javascript">
             $('.plusMinus').plusMinus();
-            
+
             $('#specButtons').plusMinus({
                 prev: $('#prev'),
                 next: $('#next')
