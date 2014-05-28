@@ -17,11 +17,11 @@
                 var btns = $([]);
                 if (data.next) {
                     data.next.data('plusminusDisabled') ? data.next.attr('disabled', 'disabled') : data.next.removeAttr('disabled');
-                    btns = btns.add(data.next)
+                    btns = btns.add(data.next);
                 }
                 if (data.prev) {
                     data.prev.data('plusminusDisabled') ? data.prev.attr('disabled', 'disabled') : data.prev.removeAttr('disabled');
-                    btns = btns.add(data.prev)
+                    btns = btns.add(data.prev);
                 }
                 if (btns)
                     btns.off('mouseenter.' + $.plusMinus.nS).off('mouseleave.' + $.plusMinus.nS).off('click.' + $.plusMinus.nS).off('mouseup.' + $.plusMinus.nS).off('mousedown.' + $.plusMinus.nS).removeData('plusMinus').removeClass('plusMinus-disabled plusMinus-enabled');
@@ -33,15 +33,13 @@
             options = options || {};
             if (this.length > 0) {
                 var settings = $.extend({}, $.plusMinus.dP, options);
-                return this.each(function(ind) {
+                return this.each(function() {
                     var input = $(this),
                             data = input.data();
 
                     methods.destroy.call(input);
+                    var opt = $.extend({}, settings, data);
 
-                    var opt = {};
-                    for (var i in $.plusMinus.dP)
-                        opt[i] = methods._checkProp.call([i], data, settings);
                     opt.next = typeof opt.next === 'string' ? methods._checkBtn.call(input, opt.next.split('.')) : opt.next;
                     opt.prev = typeof opt.prev === 'string' ? methods._checkBtn.call(input, opt.prev.split('.')) : opt.prev;
                     opt.bval = +input.val();
@@ -62,6 +60,7 @@
                     var dP = {
                         input: input
                     };
+
                     if (opt.mouseDownChange)
                         dP.interval = [];
                     if (opt.next)
@@ -89,15 +88,15 @@
                     if (opt.prev)
                         btns = btns.add(opt.prev);
 
-                    if (btns && settings.mouseenter)
+                    if (btns && opt.mouseenter)
                         btns.on('mouseenter.' + $.plusMinus.nS, function(e) {
                             var $this = $(this);
-                            $this.data('plusMinus').resMouseEnter = settings.mouseenter.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus');
+                            $this.data('plusMinus').resMouseEnter = opt.mouseenter.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus');
                         });
-                    if (btns && settings.mouseleave)
+                    if (btns && opt.mouseleave)
                         btns.on('mouseleave.' + $.plusMinus.nS, function(e) {
                             var $this = $(this);
-                            settings.mouseleave.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
+                            opt.mouseleave.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
                         });
                     btns.on('click.' + $.plusMinus.nS, function(e) {
                         methods._changeCount.call(this, $(this).data('plusMinus'));
@@ -176,9 +175,9 @@
             else
                 _change();
 
-            if (!methods._nextValue.call(input, +val, false).toString().match(data.pattern) && data.prev)
+            if (data.prev && !methods._nextValue.call(input, +val, false).toString().match(data.pattern))
                 methods._disabled.call(data.prev);
-            if (!methods._nextValue.call(input, +val, true).toString().match(data.pattern) && data.next)
+            if (data.next && !methods._nextValue.call(input, +val, true).toString().match(data.pattern))
                 methods._disabled.call(data.next);
 
             return val;
@@ -255,14 +254,17 @@
                     data = opt.input.data('plusMinus'),
                     limit = opt.next ? data.max : data.min,
                     curVal = +methods.getValue.call(opt.input),
+                    lZeroS = data.step.toString().split('0').length - 1,
                     nextVal = methods._nextValue.call(opt.input, curVal, opt.next);
 
             if (!opt.next) {
-                var difVal = parseFloat((curVal - data.min) % data.step)
+                var difVal = +((data.precision ? (curVal - data.min) % data.step : parseFloat((curVal - data.min) % data.step)).toFixed(lZeroS));
+
                 if (difVal > 0)
-                    nextVal = curVal - difVal
+                    nextVal = curVal - difVal;
                 if (difVal < 0)
                     nextVal = data.min;
+                nextVal = (+nextVal).toFixed(lZeroS);
             }
 
             if (nextVal <= limit && opt.next || nextVal >= limit && !opt.next) {
@@ -335,17 +337,7 @@
             return btn;
         },
         _isNumber: function(number) {
-            return !isNaN(parseFloat(number)) && isFinite(number)
-        },
-        _checkProp: function(elSet, opt) {
-            var prop = this[0];
-            if (methods._isNumber($.plusMinus.dP[prop]))
-                return +((elSet[prop] !== undefined && elSet[prop] !== null ? elSet[prop].toString() : elSet[prop]) || (opt[prop] !== undefined && opt[prop] !== null ? opt[prop].toString() : opt[prop]));
-            if ($.plusMinus.dP[prop] !== undefined && $.plusMinus.dP[prop] !== null && ($.plusMinus.dP[prop].toString().toLowerCase() === 'false' || $.plusMinus.dP[prop].toString().toLowerCase() === 'true'))
-                return elSet[prop] !== undefined && elSet[prop] !== null ? ((/^true$/i).test(elSet[prop].toString().toLowerCase())) : (/^true$/i).test(opt[prop].toString().toLowerCase());
-            else {
-                return elSet[prop] !== undefined ? elSet[prop] : (opt[prop] ? opt[prop] : false);
-            }
+            return !isNaN(parseFloat(number)) && isFinite(number);
         }
     };
     $.fn.plusMinus = function(method) {
