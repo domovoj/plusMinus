@@ -390,5 +390,5 @@
     $(document).ready(function() {
         $('[data-rel="plusMinus"]').plusMinus();
     });
-})($, 'ontouchstart' in document.documentElement);
+})($, document.createTouch !== undefined);
 /*/plugin plusminus end*/
