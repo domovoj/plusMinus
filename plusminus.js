@@ -1,7 +1,7 @@
 /*plugin plusminus*/
-(function($, isTouch) {
+(function ($, isTouch) {
     if (!Array.prototype.indexOf)
-        Array.prototype.indexOf = function(obj, start) {
+        Array.prototype.indexOf = function (obj, start) {
             for (var i = (start || 0); i < this.length; i++) {
                 if (this[i] === obj) {
                     return i;
@@ -10,7 +10,7 @@
             return -1;
         };
     var methods = {
-        destroy: function() {
+        destroy: function () {
             var input = $(this),
                     data = input.data('plusMinus');
             if (data) {
@@ -29,11 +29,11 @@
             }
             return input;
         },
-        init: function(options) {
+        init: function (options) {
             options = options || {};
             if (this.length > 0) {
                 var settings = $.extend({}, $.plusMinus.dP, options);
-                return this.each(function() {
+                return this.each(function () {
                     var input = $(this),
                             data = input.data();
 
@@ -73,12 +73,12 @@
                     methods.testNumber.call(input, true);
                     var inputJS = $(this).get(0);
                     if ("onpropertychange" in inputJS)
-                        inputJS.onpropertychange = function() {
+                        inputJS.onpropertychange = function () {
                             if (event.propertyName === "value")
                                 methods.testNumber.call(input);
                         };
                     else
-                        input.on('input.' + $.plusMinus.nS, function(e) {
+                        input.on('input.' + $.plusMinus.nS, function (e) {
                             methods.testNumber.call($(this));
                         });
 
@@ -89,31 +89,31 @@
                         btns = btns.add(opt.prev);
 
                     if (btns && opt.mouseenter)
-                        btns.on('mouseenter.' + $.plusMinus.nS, function(e) {
+                        btns.on('mouseenter.' + $.plusMinus.nS, function (e) {
                             var $this = $(this);
                             $this.data('plusMinus').resMouseEnter = opt.mouseenter.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus');
                         });
                     if (btns && opt.mouseleave)
-                        btns.on('mouseleave.' + $.plusMinus.nS, function(e) {
+                        btns.on('mouseleave.' + $.plusMinus.nS, function (e) {
                             var $this = $(this);
                             opt.mouseleave.call($this, input, $this.data('plusMinus').next ? 'plus' : 'minus', $this.data('plusMinus').resMouseEnter);
                         });
-                    btns.on('click.' + $.plusMinus.nS, function(e) {
+                    btns.on('click.' + $.plusMinus.nS, function (e) {
                         methods._changeCount.call(this, $(this).data('plusMinus'));
-                    }).on('mouseup.' + $.plusMinus.nS, function(e) {
+                    }).on('mouseup.' + $.plusMinus.nS, function (e) {
                         if (!isTouch)
                             input.focus();
                     });
                     if (opt.mouseDownChange) {
-                        btns.on('mousedown.' + $.plusMinus.nS, function(e) {
+                        btns.on('mousedown.' + $.plusMinus.nS, function (e) {
                             var _self = this,
                                     obj = $(_self).data('plusMinus');
-                            obj.interval[0] = setTimeout(function() {
-                                obj.interval[1] = setInterval(function() {
+                            obj.interval[0] = setTimeout(function () {
+                                obj.interval[1] = setInterval(function () {
                                     methods._changeCount.call(_self, obj);
                                 }, opt.factor);
                             }, opt.delay);
-                            $(window).off('mouseup.' + $.plusMinus.nS).on('mouseup.' + $.plusMinus.nS, function(e) {
+                            $(window).off('mouseup.' + $.plusMinus.nS).on('mouseup.' + $.plusMinus.nS, function (e) {
                                 clearTimeout(obj.interval[0]);
                                 clearInterval(obj.interval[1]);
                             });
@@ -123,24 +123,24 @@
             }
             return this;
         },
-        plus: function() {
+        plus: function () {
             var input = $(this),
                     next = input.data('plusMinus').next;
             methods._changeCount.call(next, next.data('plusMinus'));
             return input;
         },
-        minus: function() {
+        minus: function () {
             var input = $(this),
                     prev = input.data('plusMinus').prev;
             methods._changeCount.call(prev, prev.data('plusMinus'));
             return input;
         },
-        getValue: function(val) {
+        getValue: function (val) {
             var input = $(this),
                     data = input.data('plusMinus');
             return methods._valS(val !== undefined ? val : input.val().replace(data.sufix ? data.sufix : '', '').replace(data.prefix ? data.prefix : '', ''), data.divider);
         },
-        setValue: function(val, ins, noChange) {
+        setValue: function (val, ins, noChange) {
             var input = $(this),
                     data = input.data('plusMinus');
 
@@ -182,7 +182,7 @@
 
             return val;
         },
-        testNumber: function(start) {
+        testNumber: function (start) {
             var input = $(this),
                     val = methods.getValue.call(input),
                     data = input.data('plusMinus');
@@ -211,15 +211,43 @@
 
             return input;
         },
-        _valF: function(val, divider) {
+        enable: function () {
+            var $this = $(this),
+                    data = $this.data('plusMinus');
+            if (data.next && data.next.data('plusminusDisabledC') !== undefined && data.next.data('plusminusDisabledC') === false)
+                data.next.removeAttr('disabled').removeClass('plusMinus-disabled');
+            if (data.prev && data.prev.data('plusminusDisabledC') !== undefined && data.prev.data('plusminusDisabledC') === false)
+                data.prev.removeAttr('disabled').removeClass('plusMinus-disabled');
+            return $this.removeAttr('disabled').removeClass('plusMinus-disabled').addClass('plusMinus-enabled');
+        },
+        disable: function () {
+            var $this = $(this),
+                    data = $this.data('plusMinus');
+            if ($this.hasClass('plusMinus-disabled'))
+                return $this;
+            if (data.next) {
+                if (data.next.is(':disabled'))
+                    data.next.data('plusminusDisabledC', true);
+                else
+                    data.next.data('plusminusDisabledC', false);
+            }
+            if (data.prev) {
+                if (data.prev.is(':disabled'))
+                    data.prev.data('plusminusDisabledC', true);
+                else
+                    data.prev.data('plusminusDisabledC', false);
+            }
+            return $this.removeClass('plusMinus-enabled').add(data.next).add(data.prev).attr('disabled', 'disabled').addClass('plusMinus-disabled');
+        },
+        _valF: function (val, divider) {
             return val.toString().indexOf('.') === -1 ? val : val.toString().replace('.', divider);
         },
-        _valS: function(val, divider) {
+        _valS: function (val, divider) {
             return val.toString().indexOf(divider) === -1 ? val : val.toString().replace(divider, '.');
         },
-        _setCursorPosition: function(pos, change) {
+        _setCursorPosition: function (pos, change) {
             if (!isTouch && !change)
-                this.each(function() {
+                this.each(function () {
                     this.select();
                     try {
                         this.setSelectionRange(pos, pos);
@@ -229,7 +257,7 @@
                 });
             return this;
         },
-        _getCursorPosition: function() {
+        _getCursorPosition: function () {
             var el = $(this).get(0),
                     pos = 0;
             if ('selectionStart' in el) {
@@ -242,14 +270,14 @@
             }
             return pos;
         },
-        _nextValue: function(value, next) {
+        _nextValue: function (value, next) {
             var input = $(this),
                     data = input.data('plusMinus'),
                     lZeroS = data.step.toString().split('0').length - 1;
 
             return (value + (next ? data.step : -data.step)).toFixed(lZeroS);
         },
-        _changeCount: function(opt) {
+        _changeCount: function (opt) {
             var el = $(this),
                     data = opt.input.data('plusMinus'),
                     limit = opt.next ? data.max : data.min,
@@ -276,42 +304,14 @@
 
             methods._setCursorPosition.call(opt.input, opt.input.val().length);
 
-            if ((nextVal == limit && opt.next || nextVal == limit && !opt.next) && !data.overflow)
+            if ((nextVal === limit && opt.next || nextVal === limit && !opt.next) && !data.overflow)
                 methods._disabled.call(el);
             return el;
         },
-        enable: function() {
-            var $this = $(this),
-                    data = $this.data('plusMinus');
-            if (data.next && data.next.data('plusminusDisabledC') !== undefined && data.next.data('plusminusDisabledC') === false)
-                data.next.removeAttr('disabled').removeClass('plusMinus-disabled');
-            if (data.prev && data.prev.data('plusminusDisabledC') !== undefined && data.prev.data('plusminusDisabledC') === false)
-                data.prev.removeAttr('disabled').removeClass('plusMinus-disabled');
-            return $this.removeAttr('disabled').removeClass('plusMinus-disabled').addClass('plusMinus-enabled');
-        },
-        disable: function() {
-            var $this = $(this),
-                    data = $this.data('plusMinus');
-            if ($this.hasClass('plusMinus-disabled'))
-                return $this;
-            if (data.next) {
-                if (data.next.is(':disabled'))
-                    data.next.data('plusminusDisabledC', true);
-                else
-                    data.next.data('plusminusDisabledC', false);
-            }
-            if (data.prev) {
-                if (data.prev.is(':disabled'))
-                    data.prev.data('plusminusDisabledC', true);
-                else
-                    data.prev.data('plusminusDisabledC', false);
-            }
-            return $this.removeClass('plusMinus-enabled').add(data.next).add(data.prev).attr('disabled', 'disabled').addClass('plusMinus-disabled');
-        },
-        _enabled: function() {
+        _enabled: function () {
             return $(this).removeAttr('disabled').removeClass('plusMinus-disabled').addClass('plusMinus-enabled');
         },
-        _disabled: function() {
+        _disabled: function () {
             var $this = $(this),
                     data = $this.data('plusMinus');
             if (data && data.interval) {
@@ -320,11 +320,11 @@
             }
             return $this.attr('disabled', 'disabled').addClass('plusMinus-disabled').removeClass('plusMinus-enabled');
         },
-        _checkBtn: function(type) {
+        _checkBtn: function (type) {
             var btn = $(this),
                     regS = '',
                     regM = '';
-            $.each(type, function(i, v) {
+            $.each(type, function (i, v) {
                 regS = v.match(/\(.*\)/);
                 if (regS !== null) {
                     regM = regS['input'].replace(regS[0], '');
@@ -336,11 +336,11 @@
             });
             return btn;
         },
-        _isNumber: function(number) {
+        _isNumber: function (number) {
             return !isNaN(parseFloat(number)) && isFinite(number);
         }
     };
-    $.fn.plusMinus = function(method) {
+    $.fn.plusMinus = function (method) {
         if (methods[method]) {
             return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || !method) {
@@ -349,13 +349,13 @@
             $.error('Method ' + method + ' does not exist on $.plusMinus');
         }
     };
-    $.plusMinusInit = function() {
+    $.plusMinusInit = function () {
         this.nS = 'plusMinus';
-        this.method = function(m) {
+        this.method = function (m) {
             if (!/_/.test(m))
                 return methods[m];
         };
-        this.methods = function() {
+        this.methods = function () {
             var newM = {};
             for (var i in methods) {
                 if (!/_/.test(i))
@@ -382,12 +382,12 @@
             sufix: null,
             overflow: false
         };
-        this.setParameters = function(options) {
+        this.setParameters = function (options) {
             $.extend(this.dP, options);
         };
     };
     $.plusMinus = new $.plusMinusInit();
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('[data-rel="plusMinus"]').plusMinus();
     });
 })($, document.createTouch !== undefined);
