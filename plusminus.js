@@ -294,8 +294,8 @@
                     nextVal = curVal - difVal;
                 if (difVal < 0)
                     nextVal = data.min;
-                nextVal = +(nextVal.toFixed(lZeroS));
             }
+            nextVal = (+nextVal).toFixed(lZeroS);
 
             if (nextVal <= limit && opt.next || nextVal >= limit && !opt.next) {
                 methods._enabled.call(opt.next ? data.prev : data.next);
@@ -305,7 +305,7 @@
                 methods.setValue.call(opt.input, opt.next ? data.min : data.max, true);
 
             methods._setCursorPosition.call(opt.input, opt.input.val().length);
-            if (nextVal === limit && !data.overflow)
+            if (nextVal == limit && !data.overflow)
                 methods._disabled.call(el);
             return el;
         },
