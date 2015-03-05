@@ -12,7 +12,7 @@
     var methods = {
         destroy: function () {
             var input = $(this),
-                    data = input.data('plusMinus');
+                data = input.data('plusMinus');
             if (data) {
                 var btns = $([]);
                 if (data.next) {
@@ -35,7 +35,7 @@
                 var settings = $.extend({}, $.plusMinus.dP, options);
                 return this.each(function () {
                     var input = $(this),
-                            data = input.data();
+                        data = input.data();
 
                     methods.destroy.call(input);
                     var opt = $.extend({}, settings, data);
@@ -107,7 +107,7 @@
                     if (opt.mouseDownChange) {
                         btns.on('mousedown.' + $.plusMinus.nS, function (e) {
                             var _self = this,
-                                    obj = $(_self).data('plusMinus');
+                                obj = $(_self).data('plusMinus');
                             obj.interval[0] = setTimeout(function () {
                                 obj.interval[1] = setInterval(function () {
                                     methods._changeCount.call(_self, obj);
@@ -125,28 +125,29 @@
         },
         plus: function () {
             var input = $(this),
-                    next = input.data('plusMinus').next;
+                next = input.data('plusMinus').next;
             methods._changeCount.call(next, next.data('plusMinus'));
             return input;
         },
         minus: function () {
             var input = $(this),
-                    prev = input.data('plusMinus').prev;
+                prev = input.data('plusMinus').prev;
             methods._changeCount.call(prev, prev.data('plusMinus'));
             return input;
         },
         getValue: function (val) {
             var input = $(this),
-                    data = input.data('plusMinus');
+                data = input.data('plusMinus');
             return methods._valS(val !== undefined ? val : input.val().replace(data.sufix ? data.sufix : '', '').replace(data.prefix ? data.prefix : '', ''), data.divider);
         },
         setValue: function (val, ins, noChange) {
             var input = $(this),
-                    data = input.data('plusMinus');
+                data = input.data('plusMinus');
 
             var valF = methods._valF(data.precision || !methods._isNumber(val) || !methods._isNumber(val.toString()[val.toString().length - 1]) ? val : parseFloat(val), data.divider);
 
             var cP = methods._getCursorPosition.call(input);
+
             function _change() {
                 input.val((data.prefix ? data.prefix : '') + valF + (data.sufix ? data.sufix : ''));
                 if (!ins)
@@ -154,9 +155,10 @@
                 methods._setCursorPosition.call(input, cP - ((data.val ? data.val.toString().length : null) === val.toString().length ? 1 : 0), noChange);
                 data.val = +val;
             }
+
             if (!noChange && data.val !== val) {
                 var resB = {},
-                        resBA = [];
+                    resBA = [];
                 for (var i in data.callbacks.before)
                     if (data.callbacks.before[i]) {
                         resB[i] = data.callbacks.before[i].call(input, data);
@@ -184,8 +186,8 @@
         },
         testNumber: function (start) {
             var input = $(this),
-                    val = methods.getValue.call(input),
-                    data = input.data('plusMinus');
+                val = methods.getValue.call(input),
+                data = input.data('plusMinus');
             if (data.next)
                 methods._enabled.call(data.next);
             if (data.prev)
@@ -213,7 +215,7 @@
         },
         enable: function () {
             var $this = $(this),
-                    data = $this.data('plusMinus');
+                data = $this.data('plusMinus');
             if (data.next && data.next.data('plusminusDisabledC') !== undefined && data.next.data('plusminusDisabledC') === false)
                 data.next.removeAttr('disabled').removeClass('plusMinus-disabled');
             if (data.prev && data.prev.data('plusminusDisabledC') !== undefined && data.prev.data('plusminusDisabledC') === false)
@@ -222,7 +224,7 @@
         },
         disable: function () {
             var $this = $(this),
-                    data = $this.data('plusMinus');
+                data = $this.data('plusMinus');
             if ($this.hasClass('plusMinus-disabled'))
                 return $this;
             if (data.next) {
@@ -259,7 +261,7 @@
         },
         _getCursorPosition: function () {
             var el = $(this).get(0),
-                    pos = 0;
+                pos = 0;
             if ('selectionStart' in el) {
                 pos = el.selectionStart;
             } else if ('selection' in document) {
@@ -272,18 +274,18 @@
         },
         _nextValue: function (value, next) {
             var input = $(this),
-                    data = input.data('plusMinus'),
-                    lZeroS = data.step.toString().split('0').length - 1;
+                data = input.data('plusMinus'),
+                lZeroS = data.step.toString().split('0').length - 1;
 
-            return (value + (next ? data.step : -data.step)).toFixed(lZeroS);
+            return +((value + (next ? data.step : -data.step)).toFixed(lZeroS));
         },
         _changeCount: function (opt) {
             var el = $(this),
-                    data = opt.input.data('plusMinus'),
-                    limit = opt.next ? data.max : data.min,
-                    curVal = +methods.getValue.call(opt.input),
-                    lZeroS = data.step.toString().split('0').length - 1,
-                    nextVal = methods._nextValue.call(opt.input, curVal, opt.next);
+                data = opt.input.data('plusMinus'),
+                limit = opt.next ? data.max : data.min,
+                curVal = +methods.getValue.call(opt.input),
+                lZeroS = data.step.toString().split('0').length - 1,
+                nextVal = methods._nextValue.call(opt.input, curVal, opt.next);
 
             if (!opt.next) {
                 var difVal = +((data.precision ? (curVal - data.min) % data.step : parseFloat((curVal - data.min) % data.step)).toFixed(lZeroS));
@@ -292,7 +294,7 @@
                     nextVal = curVal - difVal;
                 if (difVal < 0)
                     nextVal = data.min;
-                nextVal = (+nextVal).toFixed(lZeroS);
+                nextVal = +(nextVal.toFixed(lZeroS));
             }
 
             if (nextVal <= limit && opt.next || nextVal >= limit && !opt.next) {
@@ -303,8 +305,7 @@
                 methods.setValue.call(opt.input, opt.next ? data.min : data.max, true);
 
             methods._setCursorPosition.call(opt.input, opt.input.val().length);
-
-            if ((nextVal === limit && opt.next || nextVal === limit && !opt.next) && !data.overflow)
+            if (nextVal === limit && !data.overflow)
                 methods._disabled.call(el);
             return el;
         },
@@ -313,7 +314,7 @@
         },
         _disabled: function () {
             var $this = $(this),
-                    data = $this.data('plusMinus');
+                data = $this.data('plusMinus');
             if (data && data.interval) {
                 clearTimeout(data.interval[0]);
                 clearInterval(data.interval[1]);
@@ -322,8 +323,8 @@
         },
         _checkBtn: function (type) {
             var btn = $(this),
-                    regS = '',
-                    regM = '';
+                regS = '',
+                regM = '';
             $.each(type, function (i, v) {
                 regS = v.match(/\(.*\)/);
                 if (regS !== null) {
@@ -342,7 +343,7 @@
     };
     $.fn.plusMinus = function (method) {
         if (methods[method]) {
-            return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || !method) {
             return methods.init.apply(this, arguments);
         } else {
@@ -390,5 +391,5 @@
     $(document).ready(function () {
         $('[data-rel="plusMinus"]').plusMinus();
     });
-})($, document.createTouch !== undefined);
+})(jQuery, document.createTouch !== undefined);
 /*/plugin plusminus end*/
