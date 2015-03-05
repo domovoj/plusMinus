@@ -1,1 +1,1 @@
-<a href="http://levantovych.pro100host.com/old/plugins/plusminus/">Demo</a>
+<a href="http://levantovych.pro100host.com/plugins/plusminus/">Demo</a>
