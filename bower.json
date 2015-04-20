@@ -14,7 +14,8 @@
     "bower_components",
     "test",
     "tests",
-    "demo"
+    "demo",
+    "build"
   ],
   "dependecies": {
     "jquery": ">= 1.9.0" 
