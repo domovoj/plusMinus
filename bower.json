@@ -1,0 +1,24 @@
+{
+  "name": "plusMinus",
+  "main": "plusminus.js",
+  "version": "0.0.1",
+  "homepage": "http://levantovych.pro100host.com/plugins/plusminus/",
+  "authors": [
+    "yuraL_webcodium <yura.l@webcodium.com>"
+  ],
+  "description": "plugin for replace type number",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependecies": {
+    "jquery": ">= 1.9.0" 
+  },
+  "devDependencies": {
+    "bootsrap": "last"
+  }
+}

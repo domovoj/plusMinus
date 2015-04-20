@@ -1,4 +1,3 @@
-/*plugin plusminus*/
 (function ($, isTouch) {
     if (!Array.prototype.indexOf)
         Array.prototype.indexOf = function (obj, start) {
@@ -392,4 +391,3 @@
         $('[data-rel="plusMinus"]').plusMinus();
     });
 })(jQuery, document.createTouch !== undefined);
-/*/plugin plusminus end*/
