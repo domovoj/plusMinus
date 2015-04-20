@@ -18,8 +18,5 @@
   ],
   "dependecies": {
     "jquery": ">= 1.9.0" 
-  },
-  "devDependencies": {
-    "bootsrap": "last"
   }
 }
