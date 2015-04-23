@@ -16,7 +16,7 @@ module.exports = function(grunt) {
         uglify: {
             pm: {
                 files: {
-                    '../plusminus.min.js': '../plusminus.js'
+                    '../plusminus.jquery.min.js': '../plusminus.jquery.js'
                 },
                 options: {
                     preserveComments: 'some'
@@ -25,7 +25,7 @@ module.exports = function(grunt) {
         },
         watch: {
             content: {
-                files: ['../plusminus.js'],
+                files: ['../plusminus.jquery.js'],
                 tasks: 'uglify'
             }
         },

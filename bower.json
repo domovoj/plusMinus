@@ -1,6 +1,6 @@
 {
   "name": "plusminus",
-  "main": "plusminus.js",
+  "main": "plusminus.jquery.js",
   "version": "0.0.1",
   "homepage": "http://levantovych.pro100host.com/plugins/plusminus/",
   "authors": [
@@ -17,7 +17,7 @@
     "demo",
     "build"
   ],
-  "dependecies": {
-    "jquery": ">= 1.9.0" 
+  "dependencies": {
+    "jquery": "~2.1.3"
   }
 }
