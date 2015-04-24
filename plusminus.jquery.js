@@ -387,7 +387,4 @@
         };
     };
     $.plusMinus = new $.plusMinusInit();
-    $(document).ready(function () {
-        $('.plusMinus').plusMinus();
-    });
 })(jQuery, document.createTouch !== undefined);
