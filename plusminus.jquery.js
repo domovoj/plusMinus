@@ -388,6 +388,6 @@
     };
     $.plusMinus = new $.plusMinusInit();
     $(document).ready(function () {
-        $('[type="number"]').plusMinus();
+        $('.plusMinus').plusMinus();
     });
 })(jQuery, document.createTouch !== undefined);
