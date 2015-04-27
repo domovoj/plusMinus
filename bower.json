@@ -2,7 +2,6 @@
   "name": "plusminus",
   "main": "plusminus.jquery.js",
   "version": "0.0.1",
-  "homepage": "http://levantovych.pro100host.com/plugins/plusminus/",
   "authors": [
     "yuraL_webcodium <yura.l@webcodium.com>"
   ],
@@ -14,7 +13,6 @@
     "bower_components",
     "test",
     "tests",
-    "demo",
     "build"
   ],
   "dependencies": {
